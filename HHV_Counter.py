@@ -768,10 +768,10 @@ infile = args.infile
 ref = args.reference
 genefromgb = args.genbank
 print(infile,ref,args.genbank)
-# wsize = args.winsize
-# osize = args.overlap
-wsize = [100,100,300,300,500,500,1000,1000]
-osize = [0,50,0,150,0,250,0,500]
+wsize = [args.winsize]
+osize = [args.overlap]
+# wsize = [100,100,300,300,500,500,1000,1000]
+# osize = [0,50,0,150,0,250,0,500]
 maxdel = args.maxdel
 dirName = ref +'_'+str(wsize)+'_'+str(osize)
 
