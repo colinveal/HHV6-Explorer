@@ -288,7 +288,7 @@ class SampleComp:
         err = dseq.count('E')
         gap = dseq.count('F')
 
-        coding = self.comps[s].ctype[start:stop]  #still need to check right position
+        coding = self.comps[s].ctype[start:stop] 
         cdseq = ''.join([val for is_coding, val in zip(coding,dseq) if is_coding=='c'])
         csubsall = cdseq.count('s')
         csubs = re.sub(r'(.)\1+',r'\1',cdseq).count('s')
@@ -299,7 +299,7 @@ class SampleComp:
         cinslist = [val for is_coding, val in zip(coding,inslist) if is_coding=='c']
         cins = len(cinslist) - cinslist.count('')
 
-        muts = {} #per gene in mut, added together, prob need to return separate too
+        muts = {} #per gene in mut, added together
         aafs = 0
         aasp = 0
         aain = 0
@@ -343,7 +343,6 @@ class SampleComp:
             aanocds += gene.count('X')
             aarun += gene.count('R')
 
-            # if e or g then blank window? add flag
         bcol = self.barcols[s]
         if err > 0 or gap > 0:
             bcol = 'crimson'
@@ -494,14 +493,12 @@ def introncheck (testgene,recomp,cursam,reverse):
                     introns = recomp.getcomp(cursam,testgene.exonstart[i]-1, testgene.exonstart[i]+3)
                 else:
                     introns = recomp.getcomp(cursam,testgene.exonend[i]-1, testgene.exonend[i]+3)
-                # print(introns.ref, introns.sam)
                 for p,r,s in zip (introns.refpos, introns.ref, introns.sam):
                     if r != s:
                         if type(recomp.comps[cursam].mut[p-1]) != dict:
                             recomp.comps[cursam].mut[p-1] = {}
                         if testgene.id not in recomp.comps[cursam].mut[p-1].keys():
                             recomp.comps[cursam].mut[p-1][testgene.id] = genemut(gene = testgene.id, refpos = p, splicemut=True, rstrand=reverse)
-                        # print(p,r,s,'splice mutation')
             elif i < len(testgene.exonstart)-1:
                 if reverse:
                     introns = recomp.getcomp(cursam,testgene.exonstart[i]-1, testgene.exonstart[i]+3)
@@ -515,16 +512,13 @@ def introncheck (testgene,recomp,cursam,reverse):
                             recomp.comps[cursam].mut[p-1] = {}
                         if testgene.id not in recomp.comps[cursam].mut[p-1].keys():
                             recomp.comps[cursam].mut[p-1][testgene.id] = genemut(gene = testgene.id, refpos = p, splicemut=True, rstrand=reverse)
-                        # print(p,r,s,'splice mutation')
                 for p,r,s in zip (introns.refpos, introns.ref, introns.sam):
                     if r != s:
                         if type(recomp.comps[cursam].mut[p-1]) != dict:
                             recomp.comps[cursam].mut[p-1] = {}
                         if testgene.id not in recomp.comps[cursam].mut[p-1].keys():
                             recomp.comps[cursam].mut[p-1][testgene.id] = genemut(gene = testgene.id, refpos = p, splicemut=True, rstrand=reverse)
-                        # print(p,r,s,'splice mutation')
-                # print(introne.ref,introne.sam)
-                # print(introns.ref,introns.sam)  
+
             elif i == len(testgene.exonstart)-1:
                 if reverse:
                     introne = recomp.getcomp(cursam,testgene.exonend[i]-1, testgene.exonend[i]+3)
@@ -536,8 +530,7 @@ def introncheck (testgene,recomp,cursam,reverse):
                             recomp.comps[cursam].mut[p-1] = {}
                         if testgene.id not in recomp.comps[cursam].mut[p-1].keys():
                             recomp.comps[cursam].mut[p-1][testgene.id] = genemut(gene = testgene.id, refpos = p, splicemut=True,rstrand=reverse)
-                        # print(p,r,s,'splice mutation')
-                # print(introne.ref,introne.sam)
+
 
 def processSamAA(sc,ins,cfs,fs,flag,saseq,non,sout):
     while len(sc) >= 3:
@@ -604,8 +597,6 @@ def processSamAA(sc,ins,cfs,fs,flag,saseq,non,sout):
     return sc,ins,cfs,fs,flag,saseq,non,sout
 
 def getaaseqs(testgene,recomp,cursam,reverse):
-    # if testgene.id == 'HN2':
-    #     print('pause')
     dt = ''
     gc = ''
     rc = ''
@@ -660,86 +651,21 @@ def getaaseqs(testgene,recomp,cursam,reverse):
                 sc = ''
             if len(sc) - sc.count('-') >= 3 and not error and not fail:
                 sc,ins,cfs,fs,flag,saseq,non,sout = processSamAA(sc,ins,cfs,fs,flag,saseq,non,sout)
-            # while len(sc) - sc.count('-') >= 3 and not error and not fail:
-            #     psco = ''
-            #     sout += sc + ' '
-            #     while sc[:3] == '---':
-            #         psco += '-'
-            #         sc = sc[3:]
-            #     sco = '-'*int(sc.count('-')/3) #number of deleted codons
-            #     tfs = sc.count('-')%3 * -1 #frameshift from deletions
-            #     sc = sc.replace('-','') #remove deleted bases
-
-            #     if sc[:3].isupper(): #check inserted codon
-            #         ins = True
-            #     elif any(l.isupper() for l in sc[:3]): # check partial codon insertion
-            #         tfs += sum(1 for u in sc[:3] if u.isupper()) # count inserted bases taking deletions into account
-            #         ins = False
-            #     else:
-            #         ins = False
-
-            #     if tfs < 0:
-            #         cfs = "FSD"
-            #     elif tfs > 0:
-            #         cfs = "FSI"
-            #     else:
-            #         cfs = ''
-
-            #     fs += tfs
-            #     if fs < 0:
-            #         fs = (fs%3)-3
-            #     if fs > 0:
-            #         if int(fs/3)>0:
-            #             ins = True
-            #         fs = fs%3
-            #     if fs != 0:
-            #         flag = True
-            #     else:
-            #         flag = False
-
-            #     sout += psco + ' ' + codontable[sc[:3].upper()] + ' ' + sco + ' ' + str(fs) + ' ' + str(flag) + ' ' + str(ins)
-
-            #     for d in psco:
-            #         saseq.append([sampleAA(non,flag,cfs,'-')])
-            #     if ins:
-            #         if non:
-            #             saseq[-1].append(sampleAA(non,flag,cfs,'-'))
-            #         else:
-            #             saseq[-1].append(sampleAA(non,flag,cfs,codontable[sc[:3].upper()]))
-            #     else:
-            #         if non:
-            #             saseq.append([sampleAA(non,flag,cfs,'-')])
-            #         else:   
-            #             saseq.append([sampleAA(non,flag,cfs,codontable[sc[:3].upper()])])
-            #     for d in sco:
-            #         saseq.append([sampleAA(non,flag,cfs,'-')]) 
-
-            #     if codontable[sc[:3].upper()] == '_':
-            #         non = True
-
-            #     sc = sc[3:] #remove codon and repeat until done
-
+ 
             if len(rc) == 3:
                 if gc != rc:
                     print("FAIL ref and gene do not match" + gc + rc)
                 if (error or fail) and not pre_error:
-                    # print(testgene.id,t.refpos[y],"ref",rc, 'EF')
                     saseq.append([sampleAA(error=error,fail=fail)])
              
                 if reverse:
-                    # if not error and not fail:
-                        # print(testgene.id,t.refpos[y],"ref",rc, codontable[rc[:3].upper()], sout) #position is recorded at 3rd base of codon in case last pos in new exon
                     aapos.append(t.refpos[y])
                 else:
-                    # if not error and not fail:
-                        # print(testgene.id,t.refpos[x],"ref",rc, codontable[rc[:3].upper()], sout)
                     aapos.append(t.refpos[x])
                 try:
                     raseq.append(codontable[rc[:3].upper()])
                     if codontable[rc[:3].upper()] == '_' and len(saseq) < len(raseq) and len(sc) > 0 and not error and not fail:
                         saseq.append([sampleAA(non,flag,cfs,'-')])
-                    # if codontable[rc[:3].upper()] == '_' and len(saseq) < len(raseq):
-                        # saseq.append([sampleAA(non,flag,cfs,'-')])
                 except:
                     raseq.append('X')
                 if sout == '':
@@ -753,7 +679,6 @@ def getaaseqs(testgene,recomp,cursam,reverse):
     if len(raseq) != len(saseq):
         if len(sc) >= 3 and not error and not fail:
             sc,ins,cfs,fs,flag,saseq,non,sout = processSamAA(sc,ins,cfs,fs,flag,saseq,non,sout)
-        # if (len(sc)%3 != 0 or error or fail) and len(raseq)-len(saseq) == 1:
         if (len(sc)%3 != 0 or error or fail or non):
             while len(saseq) < len(raseq):                          #or keep adding until stop...
                 saseq.append([sampleAA(error=error,fail=fail, non=non)])
@@ -782,44 +707,31 @@ def aaresult(aapos,raseq,saseq,error,fail,recomp,cursam,reverse,testgene):
                 recomp.comps[cursam].mut[p-1][testgene.id].ref += '-'
                 recomp.comps[cursam].mut[p-1][testgene.id].insertion = True        
             if saa.cfs != '':
-                # print(p,r,saa,cfs)
                 recomp.comps[cursam].mut[p-1][testgene.id].frameshift = saa.cfs 
             if error:
-                # print(p,r,saa,"E")
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'E'
             elif fail:
-                # print(p,r,saa,"G")
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'G'
             elif (start and r != saa.aa) or nocds == True:
                 nocds = True #no similar for E and F?
-                # print(p,r,saa,"X") #no cds first aa disrupted
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'X'
             elif saa.non:
-                # print(p,r,saa,"T") #prior non so aa truncated
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'T'
             elif r == '-' and saa.aa == '_':
-                # print(p,r,saa,"N") #NONSENSE insertion
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'N'
             elif r == '-':
-                # print(p,r,saa,"I") #insertion aa
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'I'
             elif r != '_' and saa.aa == '_':
-                # print(p,r,saa,"N") #NONSENSE
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'N'
             elif r == '_' and saa.aa != '_':
-                # print(p,r,saa,"R") #Run on
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'R'
             elif saa.aa == '-':
-                # print(p,r,saa,"D") #Deletion (fs deletion separate?)
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'D'
             elif r != saa.aa and not saa.fs:
-                # print(p,r,saa,"M") #missense
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'M'
             elif r !=  saa.aa and saa.fs:
-                # print(p,r,saa,"F") #Frameshift missense
                 recomp.comps[cursam].mut[p-1][testgene.id].change += 'F'
             elif r == saa.aa:
-                # print(p,r,saa,".")
                 recomp.comps[cursam].mut[p-1][testgene.id].change += '.'
             else:
                 print('other')
@@ -890,9 +802,6 @@ samp = Samples(infile)
 print('loading genes')
 genelist = GenesFromRef(genefromgb)
 
-# for gn in genes.getgenenames():
-#     print(genes.getgene(gn).id)
-#     print(genes.getgene(gn).fstrand)
 
 print('Performing comparison')
 recomp = SampleComp(ref,samp,mdel=maxdel)
@@ -910,14 +819,11 @@ outfile.close()
 
 print("saved")
 
-# ref = "GLA_25506"
 
 print("starting counting")
-# infile = open('./'+ref+'/data/'+ref+".pickle",'rb')
-# test = pickle.load(infile)
+
 recomp.barcols={}
-# print("loaded file")
-# infile.close()
+
 
 for win,ov in zip(wsize,osize):
     genes = recomp.getgenes(win,ov)
